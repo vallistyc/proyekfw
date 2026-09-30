@@ -1,6 +1,0 @@
-CREATE TABLE pemilik (
-    idpemilik SERIAL PRIMARY KEY,
-    no_wa VARCHAR(45) NOT NULL,
-    alamat VARCHAR(100) NOT NULL,
-    iduser BIGINT NOT NULL UNIQUE REFERENCES "user"(iduser) ON DELETE CASCADE
-);

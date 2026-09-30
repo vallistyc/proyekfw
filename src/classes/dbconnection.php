@@ -1,11 +1,11 @@
 <?php
 class DBconnection
 {
-    private string $host = "localhost";
-    private string $port = "5432";
-    private string $dbname = "kuliah_wf_2025";
-    private string $username = "postgres";
-    private string $password = "Iv4ldh10";
+    private string $host = "";
+    private string $port = "";
+    private string $dbname = "";
+    private string $username = "";
+    private string $password = "";
     private $dbconn = null;
 
     public function __construct()
