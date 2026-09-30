@@ -1,4 +1,40 @@
 <?php
-require __DIR__.'/config.php';if(Auth::user())pindah(Auth::user()['role']==='admin'?'admin/index.php':'index.php');$error='';
-if($_SERVER['REQUEST_METHOD']==='POST'){$nama=trim($_POST['nama']??'');$email=trim($_POST['email']??'');$hp=trim($_POST['no_hp']??'');$pw=$_POST['password']??'';if(empty($nama)||!filter_var($email,FILTER_VALIDATE_EMAIL)||empty($hp)||empty($pw))$error='Semua kolom wajib diisi dengan benar.';else try{(new User())->register($nama,$email,$hp,$pw);pesan('Pendaftaran berhasil. Silakan login.');pindah('login.php');}catch(PDOException $e){$error=$e->getCode()==='23000'?'Email sudah terdaftar.':'Pendaftaran gagal. Coba lagi.';}}
-$judul='Daftar';require __DIR__.'/includes/header.php';?><div class="row justify-content-center"><div class="col-md-7 col-lg-6"><div class="card shadow-sm"><div class="card-body p-4"><h1 class="h3">Daftar Akun</h1><?php if($error):?><div class="alert alert-danger"><?=e($error)?></div><?php endif?><form method="post"><div class="mb-3"><label class="form-label">Nama</label><input class="form-control" name="nama" value="<?=e($_POST['nama']??'')?>" required></div><div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" value="<?=e($_POST['email']??'')?>" required></div><div class="mb-3"><label class="form-label">No. HP</label><input class="form-control" name="no_hp" value="<?=e($_POST['no_hp']??'')?>" required></div><div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" name="password" required></div><button class="btn btn-primary">Daftar</button></form></div></div></div></div><?php require __DIR__.'/includes/footer.php';
+require __DIR__ . "/config.php";
+if (Auth::user()) {
+    pindah(Auth::user()["role"] === "admin" ? "admin/index.php" : "index.php");
+}
+$error = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $nama = trim($_POST["nama"] ?? "");
+    $email = trim($_POST["email"] ?? "");
+    $hp = trim($_POST["no_hp"] ?? "");
+    $pw = $_POST["password"] ?? "";
+    if (empty($nama) || !filter_var($email, FILTER_VALIDATE_EMAIL) || empty($hp) || empty($pw)) {
+        $error = "Semua kolom wajib diisi dengan benar.";
+    } else {
+        try {
+            new User()->register($nama, $email, $hp, $pw);
+            pesan("Pendaftaran berhasil. Silakan login.");
+            pindah("login.php");
+        } catch (PDOException $e) {
+            $error =
+                $e->getCode() === "23000"
+                    ? "Email sudah terdaftar."
+                    : "Pendaftaran gagal. Coba lagi.";
+        };
+    }
+}
+$judul = "Daftar";
+require __DIR__ . "/includes/header.php";
+?><div class="row justify-content-center"><div class="col-md-7 col-lg-6"><div class="card shadow-sm"><div class="card-body p-4"><h1 class="h3">Daftar Akun</h1><?php if (
+    $error
+): ?><div class="alert alert-danger"><?= e(
+    $error,
+) ?></div><?php endif; ?><form method="post"><div class="mb-3"><label class="form-label">Nama</label><input class="form-control" name="nama" value="<?= e(
+    $_POST["nama"] ?? "",
+) ?>" required></div><div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" value="<?= e(
+    $_POST["email"] ?? "",
+) ?>" required></div><div class="mb-3"><label class="form-label">No. HP</label><input class="form-control" name="no_hp" value="<?= e(
+    $_POST["no_hp"] ?? "",
+) ?>" required></div><div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" name="password" required></div><button class="btn btn-primary">Daftar</button></form></div></div></div></div><?php require __DIR__ .
+    "/includes/footer.php";

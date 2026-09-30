@@ -1,2 +1,61 @@
 <?php
-require __DIR__.'/../config.php';Auth::requireAdmin();$master=new Lokasi();$namaMaster='Lokasi';$url='lokasi.php';$edit=$master->find((int)($_GET['edit']??0));$error='';if($_SERVER['REQUEST_METHOD']==='POST'){$aksi=$_POST['aksi']??'';$id=(int)($_POST['id']??0);$nama=trim($_POST['nama']??'');try{if($aksi==='tambah'&&$nama!==''){$master->create($nama);pesan('Lokasi ditambahkan.');pindah($url);}if($aksi==='ubah'&&$nama!==''&&$master->find($id)){$master->update($id,$nama);pesan('Lokasi diperbarui.');pindah($url);}if($aksi==='hapus'&&$id){if($master->isUsed($id))pesan('Masih dipakai oleh laporan.','error');else{$master->delete($id);pesan('Lokasi dihapus.');}pindah($url);}}catch(PDOException $e){$error='Nama lokasi sudah digunakan.';}}$judul='Kelola Lokasi';require __DIR__.'/../includes/header.php';?><h1 class="h2">Kelola Lokasi</h1><?php if($error):?><div class="alert alert-danger"><?=e($error)?></div><?php endif?><form method="post" class="card card-body mb-4"><input type="hidden" name="aksi" value="<?=$edit?'ubah':'tambah'?>"><?php if($edit):?><input type="hidden" name="id" value="<?=$edit['id']?>"><?php endif?><label class="form-label"><?=$edit?'Ubah':'Tambah'?> lokasi</label><input class="form-control mb-2" name="nama" value="<?=e($edit['nama']??'')?>" required><button class="btn btn-primary"><?=$edit?'Simpan':'Tambah'?></button></form><table class="table bg-white"><thead><tr><th>Nama</th><th>Aksi</th></tr></thead><tbody><?php foreach($master->all() as $row):?><tr><td><?=e($row['nama'])?></td><td><a class="btn btn-sm btn-outline-secondary" href="?edit=<?=$row['id']?>">Edit</a> <form class="d-inline" method="post"><input type="hidden" name="aksi" value="hapus"><input type="hidden" name="id" value="<?=$row['id']?>"><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Yakin hapus?')">Hapus</button></form></td></tr><?php endforeach?></tbody></table><?php require __DIR__.'/../includes/footer.php';
+require __DIR__ . "/../config.php";
+Auth::requireAdmin();
+$master = new Lokasi();
+$namaMaster = "Lokasi";
+$url = "lokasi.php";
+$edit = $master->find((int) ($_GET["edit"] ?? 0));
+$error = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $aksi = $_POST["aksi"] ?? "";
+    $id = (int) ($_POST["id"] ?? 0);
+    $nama = trim($_POST["nama"] ?? "");
+    try {
+        if ($aksi === "tambah" && $nama !== "") {
+            $master->create($nama);
+            pesan("Lokasi ditambahkan.");
+            pindah($url);
+        }
+        if ($aksi === "ubah" && $nama !== "" && $master->find($id)) {
+            $master->update($id, $nama);
+            pesan("Lokasi diperbarui.");
+            pindah($url);
+        }
+        if ($aksi === "hapus" && $id) {
+            if ($master->isUsed($id)) {
+                pesan("Masih dipakai oleh laporan.", "error");
+            } else {
+                $master->delete($id);
+                pesan("Lokasi dihapus.");
+            }
+            pindah($url);
+        }
+    } catch (PDOException $e) {
+        $error = "Nama lokasi sudah digunakan.";
+    }
+}
+$judul = "Kelola Lokasi";
+require __DIR__ . "/../includes/header.php";
+?><h1 class="h2">Kelola Lokasi</h1><?php if ($error): ?><div class="alert alert-danger"><?= e(
+    $error,
+) ?></div><?php endif; ?><form method="post" class="card card-body mb-4"><input type="hidden" name="aksi" value="<?= $edit
+    ? "ubah"
+    : "tambah" ?>"><?php if ($edit): ?><input type="hidden" name="id" value="<?= $edit[
+    "id"
+] ?>"><?php endif; ?><label class="form-label"><?= $edit
+    ? "Ubah"
+    : "Tambah" ?> lokasi</label><input class="form-control mb-2" name="nama" value="<?= e(
+     $edit["nama"] ?? "",
+ ) ?>" required><button class="btn btn-primary"><?= $edit
+    ? "Simpan"
+    : "Tambah" ?></button></form><table class="table bg-white"><thead><tr><th>Nama</th><th>Aksi</th></tr></thead><tbody><?php foreach (
+    $master->all()
+    as $row
+): ?><tr><td><?= e(
+    $row["nama"],
+) ?></td><td><a class="btn btn-sm btn-outline-secondary" href="?edit=<?= $row[
+    "id"
+] ?>">Edit</a> <form class="d-inline" method="post"><input type="hidden" name="aksi" value="hapus"><input type="hidden" name="id" value="<?= $row[
+    "id"
+] ?>"><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Yakin hapus?')">Hapus</button></form></td></tr><?php endforeach; ?></tbody></table><?php require __DIR__ .
+    "/../includes/footer.php";

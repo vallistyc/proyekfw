@@ -1,2 +1,28 @@
 <?php
-require __DIR__.'/../config.php';Auth::requireAdmin();$jumlah=(new Laporan())->countByStatus();$users=new User();$terbaru=(new Laporan())->recentPending(5);$judul='Dashboard Admin';require __DIR__.'/../includes/header.php';?><h1 class="h2">Dashboard Admin</h1><div class="row g-3 mb-4"><?php foreach(['menunggu'=>'Menunggu','dipublikasi'=>'Dipublikasi','ditolak'=>'Ditolak','ditemukan'=>'Ditemukan'] as $s=>$label):?><div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted"><?=e($label)?></div><div class="fs-2"><?=$jumlah[$s]?></div></div></div></div><?php endforeach?><div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body">Total user<div class="fs-2"><?=$users->count()?></div></div></div></div></div><h2 class="h4">Laporan menunggu terbaru</h2><div class="table-responsive"><table class="table bg-white"><thead><tr><th>Pelapor</th><th>Barang</th><th>Tanggal</th><th></th></tr></thead><tbody><?php foreach($terbaru as $l):?><tr><td><?=e($l['nama_pelapor'])?></td><td><?=e($l['nama_barang'])?></td><td><?=e($l['created_at'])?></td><td><a href="laporan-detail.php?id=<?=$l['id']?>">Detail</a></td></tr><?php endforeach?><?php if(!$terbaru):?><tr><td colspan="4">Tidak ada laporan menunggu.</td></tr><?php endif?></tbody></table></div><?php require __DIR__.'/../includes/footer.php';
+require __DIR__ . "/../config.php";
+Auth::requireAdmin();
+$jumlah = new Laporan()->countByStatus();
+$users = new User();
+$terbaru = new Laporan()->recentPending(5);
+$judul = "Dashboard Admin";
+require __DIR__ . "/../includes/header.php";
+?><h1 class="h2">Dashboard Admin</h1><div class="row g-3 mb-4"><?php foreach (
+    [
+        "menunggu" => "Menunggu",
+        "dipublikasi" => "Dipublikasi",
+        "ditolak" => "Ditolak",
+        "ditemukan" => "Ditemukan",
+    ]
+    as $s => $label
+): ?><div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted"><?= e(
+    $label,
+) ?></div><div class="fs-2"><?= $jumlah[
+    $s
+] ?></div></div></div></div><?php endforeach; ?><div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body">Total user<div class="fs-2"><?= $users->count() ?></div></div></div></div></div><h2 class="h4">Laporan menunggu terbaru</h2><div class="table-responsive"><table class="table bg-white"><thead><tr><th>Pelapor</th><th>Barang</th><th>Tanggal</th><th></th></tr></thead><tbody><?php
+foreach ($terbaru as $l): ?><tr><td><?= e($l["nama_pelapor"]) ?></td><td><?= e(
+    $l["nama_barang"],
+) ?></td><td><?= e($l["created_at"]) ?></td><td><a href="laporan-detail.php?id=<?= $l[
+    "id"
+] ?>">Detail</a></td></tr><?php endforeach;
+if (!$terbaru): ?><tr><td colspan="4">Tidak ada laporan menunggu.</td></tr><?php endif;
+?></tbody></table></div><?php require __DIR__ . "/../includes/footer.php";

@@ -1,2 +1,76 @@
 <?php
-require __DIR__.'/config.php';Auth::requireUser();$id=(int)($_GET['id']??0);$laporan=new Laporan();$l=$laporan->find($id);if(!$l||$l['user_id']!=Auth::user()['id']||!in_array($l['status'],['menunggu','ditolak'],true)){pesan('Laporan tidak dapat diedit.','error');pindah('histori.php');}$kategori=new Kategori();$lokasi=new Lokasi();$error='';if($_SERVER['REQUEST_METHOD']==='POST'){$d=['kategori_id'=>(int)($_POST['kategori_id']??0),'lokasi_id'=>(int)($_POST['lokasi_id']??0),'nama_barang'=>trim($_POST['nama_barang']??''),'deskripsi'=>trim($_POST['deskripsi']??''),'tanggal_hilang'=>$_POST['tanggal_hilang']??'','foto'=>null];if(empty($d['nama_barang'])||empty($d['deskripsi'])||empty($d['kategori_id'])||empty($d['lokasi_id'])||empty($d['tanggal_hilang']))$error='Semua kolom selain foto wajib diisi.';elseif($d['tanggal_hilang']>date('Y-m-d'))$error='Tanggal hilang tidak boleh melebihi hari ini.';else{if(!empty($_FILES['foto']['name'])){$nama=time().'_'.basename($_FILES['foto']['name']);if(move_uploaded_file($_FILES['foto']['tmp_name'],UPLOAD_DIR.$nama))$d['foto']=$nama;}$laporan->update($id,$d);pesan('Laporan berhasil diperbarui.');pindah('histori.php');}}$judul='Edit Laporan';require __DIR__.'/includes/header.php';?><h1 class="h2">Edit Laporan</h1><?php if($error):?><div class="alert alert-danger"><?=e($error)?></div><?php endif?><form method="post" enctype="multipart/form-data" class="card card-body"><label class="form-label">Nama barang</label><input class="form-control mb-3" name="nama_barang" value="<?=e($_POST['nama_barang']??$l['nama_barang'])?>" required><label class="form-label">Kategori</label><select class="form-select mb-3" name="kategori_id" required><?php foreach($kategori->all() as $k):?><option value="<?=$k['id']?>" <?=($_POST['kategori_id']??$l['kategori_id'])==$k['id']?'selected':''?>><?=e($k['nama'])?></option><?php endforeach?></select><label class="form-label">Lokasi</label><select class="form-select mb-3" name="lokasi_id" required><?php foreach($lokasi->all() as $x):?><option value="<?=$x['id']?>" <?=($_POST['lokasi_id']??$l['lokasi_id'])==$x['id']?'selected':''?>><?=e($x['nama'])?></option><?php endforeach?></select><label class="form-label">Tanggal hilang</label><input class="form-control mb-3" type="date" max="<?=date('Y-m-d')?>" name="tanggal_hilang" value="<?=e($_POST['tanggal_hilang']??$l['tanggal_hilang'])?>" required><label class="form-label">Deskripsi</label><textarea class="form-control mb-3" name="deskripsi" required><?=e($_POST['deskripsi']??$l['deskripsi'])?></textarea><label class="form-label">Foto (opsional)</label><input class="form-control mb-3" type="file" name="foto" accept="image/*"><button class="btn btn-primary">Simpan Perubahan</button></form><?php require __DIR__.'/includes/footer.php';
+require __DIR__ . "/config.php";
+Auth::requireUser();
+$id = (int) ($_GET["id"] ?? 0);
+$laporan = new Laporan();
+$l = $laporan->find($id);
+if (
+    !$l ||
+    $l["user_id"] != Auth::user()["id"] ||
+    !in_array($l["status"], ["menunggu", "ditolak"], true)
+) {
+    pesan("Laporan tidak dapat diedit.", "error");
+    pindah("histori.php");
+}
+$kategori = new Kategori();
+$lokasi = new Lokasi();
+$error = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $d = [
+        "kategori_id" => (int) ($_POST["kategori_id"] ?? 0),
+        "lokasi_id" => (int) ($_POST["lokasi_id"] ?? 0),
+        "nama_barang" => trim($_POST["nama_barang"] ?? ""),
+        "deskripsi" => trim($_POST["deskripsi"] ?? ""),
+        "tanggal_hilang" => $_POST["tanggal_hilang"] ?? "",
+        "foto" => null,
+    ];
+    if (
+        empty($d["nama_barang"]) ||
+        empty($d["deskripsi"]) ||
+        empty($d["kategori_id"]) ||
+        empty($d["lokasi_id"]) ||
+        empty($d["tanggal_hilang"])
+    ) {
+        $error = "Semua kolom selain foto wajib diisi.";
+    } elseif ($d["tanggal_hilang"] > date("Y-m-d")) {
+        $error = "Tanggal hilang tidak boleh melebihi hari ini.";
+    } else {
+        if (!empty($_FILES["foto"]["name"])) {
+            $nama = time() . "_" . basename($_FILES["foto"]["name"]);
+            if (move_uploaded_file($_FILES["foto"]["tmp_name"], UPLOAD_DIR . $nama)) {
+                $d["foto"] = $nama;
+            }
+        }
+        $laporan->update($id, $d);
+        pesan("Laporan berhasil diperbarui.");
+        pindah("histori.php");
+    }
+}
+$judul = "Edit Laporan";
+require __DIR__ . "/includes/header.php";
+?><h1 class="h2">Edit Laporan</h1><?php if ($error): ?><div class="alert alert-danger"><?= e(
+    $error,
+) ?></div><?php endif; ?><form method="post" enctype="multipart/form-data" class="card card-body"><label class="form-label">Nama barang</label><input class="form-control mb-3" name="nama_barang" value="<?= e(
+    $_POST["nama_barang"] ?? $l["nama_barang"],
+) ?>" required><label class="form-label">Kategori</label><select class="form-select mb-3" name="kategori_id" required><?php foreach (
+    $kategori->all()
+    as $k
+): ?><option value="<?= $k["id"] ?>" <?= ($_POST["kategori_id"] ?? $l["kategori_id"]) == $k["id"]
+    ? "selected"
+    : "" ?>><?= e(
+    $k["nama"],
+) ?></option><?php endforeach; ?></select><label class="form-label">Lokasi</label><select class="form-select mb-3" name="lokasi_id" required><?php foreach (
+    $lokasi->all()
+    as $x
+): ?><option value="<?= $x["id"] ?>" <?= ($_POST["lokasi_id"] ?? $l["lokasi_id"]) == $x["id"]
+    ? "selected"
+    : "" ?>><?= e(
+    $x["nama"],
+) ?></option><?php endforeach; ?></select><label class="form-label">Tanggal hilang</label><input class="form-control mb-3" type="date" max="<?= date(
+    "Y-m-d",
+) ?>" name="tanggal_hilang" value="<?= e(
+    $_POST["tanggal_hilang"] ?? $l["tanggal_hilang"],
+) ?>" required><label class="form-label">Deskripsi</label><textarea class="form-control mb-3" name="deskripsi" required><?= e(
+    $_POST["deskripsi"] ?? $l["deskripsi"],
+) ?></textarea><label class="form-label">Foto (opsional)</label><input class="form-control mb-3" type="file" name="foto" accept="image/*"><button class="btn btn-primary">Simpan Perubahan</button></form><?php require __DIR__ .
+    "/includes/footer.php";

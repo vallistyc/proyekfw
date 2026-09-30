@@ -1,15 +1,113 @@
 <?php
-class Laporan {
- private PDO $db; public function __construct(){$this->db=Database::getConnection();}
- public function create($d): int {$s=$this->db->prepare("INSERT INTO laporan (user_id,kategori_id,lokasi_id,nama_barang,deskripsi,tanggal_hilang,foto,status) VALUES (:user_id,:kategori_id,:lokasi_id,:nama_barang,:deskripsi,:tanggal_hilang,:foto,'menunggu')");$s->execute($d);return (int)$this->db->lastInsertId();}
- public function find($id): array|false {$s=$this->db->prepare('SELECT l.*,u.nama AS nama_pelapor,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN users u ON u.id=l.user_id JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.id=?');$s->execute([$id]);return $s->fetch();}
- public function feed($userId,$keyword='',$kategoriId=''): array {$sql="SELECT l.*,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.status='dipublikasi' AND l.user_id != :me";$p=['me'=>$userId];if($keyword!==''){$sql.=' AND l.nama_barang LIKE :kw';$p['kw']='%'.$keyword.'%';}if($kategoriId!==''){$sql.=' AND l.kategori_id=:kat';$p['kat']=$kategoriId;}$sql.=' ORDER BY l.created_at DESC';$s=$this->db->prepare($sql);$s->execute($p);return $s->fetchAll();}
- public function byUser($userId,$status=null): array {$sql='SELECT l.*,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.user_id=?';$p=[$userId];if($status){$sql.=' AND l.status=?';$p[]=$status;}$sql.=' ORDER BY l.created_at DESC';$s=$this->db->prepare($sql);$s->execute($p);return $s->fetchAll();}
- public function update($id,$d): bool {$s=$this->db->prepare("UPDATE laporan SET kategori_id=?,lokasi_id=?,nama_barang=?,deskripsi=?,tanggal_hilang=?,foto=COALESCE(?,foto),catatan_admin=IF(status='ditolak',NULL,catatan_admin),status=IF(status='ditolak','menunggu',status) WHERE id=?");return $s->execute([$d['kategori_id'],$d['lokasi_id'],$d['nama_barang'],$d['deskripsi'],$d['tanggal_hilang'],$d['foto'],$id]);}
- public function delete($id): bool {$s=$this->db->prepare('DELETE FROM laporan WHERE id=?');return $s->execute([$id]);}
- public function setStatus($id,$status,$catatan=null): bool {$s=$this->db->prepare('UPDATE laporan SET status=?,catatan_admin=? WHERE id=?');return $s->execute([$status,$catatan,$id]);}
- public function countByStatus(): array {$rows=$this->db->query('SELECT status,COUNT(*) AS jumlah FROM laporan GROUP BY status')->fetchAll();$hasil=array_fill_keys(['menunggu','dipublikasi','ditolak','ditemukan'],0);foreach($rows as $r)$hasil[$r['status']]=(int)$r['jumlah'];return $hasil;}
- public function allForAdmin($status=null): array {$sql='SELECT l.*,u.nama AS nama_pelapor,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN users u ON u.id=l.user_id JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id';if($status){$s=$this->db->prepare($sql.' WHERE l.status=? ORDER BY l.created_at DESC');$s->execute([$status]);return $s->fetchAll();}return $this->db->query($sql.' ORDER BY l.created_at DESC')->fetchAll();}
- public function recentPending($limit=5): array {$limit=max(1,min(20,(int)$limit));return $this->db->query("SELECT l.*,u.nama AS nama_pelapor FROM laporan l JOIN users u ON u.id=l.user_id WHERE l.status='menunggu' ORDER BY l.created_at DESC LIMIT $limit")->fetchAll();}
+class Laporan
+{
+    private PDO $db;
+    public function __construct()
+    {
+        $this->db = Database::getConnection();
+    }
+    public function create($d): int
+    {
+        $s = $this->db->prepare(
+            "INSERT INTO laporan (user_id,kategori_id,lokasi_id,nama_barang,deskripsi,tanggal_hilang,foto,status) VALUES (:user_id,:kategori_id,:lokasi_id,:nama_barang,:deskripsi,:tanggal_hilang,:foto,'menunggu')",
+        );
+        $s->execute($d);
+        return (int) $this->db->lastInsertId();
+    }
+    public function find($id): array|false
+    {
+        $s = $this->db->prepare(
+            "SELECT l.*,u.nama AS nama_pelapor,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN users u ON u.id=l.user_id JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.id=?",
+        );
+        $s->execute([$id]);
+        return $s->fetch();
+    }
+    public function feed($userId, $keyword = "", $kategoriId = ""): array
+    {
+        $sql =
+            "SELECT l.*,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.status='dipublikasi' AND l.user_id != :me";
+        $p = ["me" => $userId];
+        if ($keyword !== "") {
+            $sql .= " AND l.nama_barang LIKE :kw";
+            $p["kw"] = "%" . $keyword . "%";
+        }
+        if ($kategoriId !== "") {
+            $sql .= " AND l.kategori_id=:kat";
+            $p["kat"] = $kategoriId;
+        }
+        $sql .= " ORDER BY l.created_at DESC";
+        $s = $this->db->prepare($sql);
+        $s->execute($p);
+        return $s->fetchAll();
+    }
+    public function byUser($userId, $status = null): array
+    {
+        $sql =
+            "SELECT l.*,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id WHERE l.user_id=?";
+        $p = [$userId];
+        if ($status) {
+            $sql .= " AND l.status=?";
+            $p[] = $status;
+        }
+        $sql .= " ORDER BY l.created_at DESC";
+        $s = $this->db->prepare($sql);
+        $s->execute($p);
+        return $s->fetchAll();
+    }
+    public function update($id, $d): bool
+    {
+        $s = $this->db->prepare(
+            "UPDATE laporan SET kategori_id=?,lokasi_id=?,nama_barang=?,deskripsi=?,tanggal_hilang=?,foto=COALESCE(?,foto),catatan_admin=IF(status='ditolak',NULL,catatan_admin),status=IF(status='ditolak','menunggu',status) WHERE id=?",
+        );
+        return $s->execute([
+            $d["kategori_id"],
+            $d["lokasi_id"],
+            $d["nama_barang"],
+            $d["deskripsi"],
+            $d["tanggal_hilang"],
+            $d["foto"],
+            $id,
+        ]);
+    }
+    public function delete($id): bool
+    {
+        $s = $this->db->prepare("DELETE FROM laporan WHERE id=?");
+        return $s->execute([$id]);
+    }
+    public function setStatus($id, $status, $catatan = null): bool
+    {
+        $s = $this->db->prepare("UPDATE laporan SET status=?,catatan_admin=? WHERE id=?");
+        return $s->execute([$status, $catatan, $id]);
+    }
+    public function countByStatus(): array
+    {
+        $rows = $this->db
+            ->query("SELECT status,COUNT(*) AS jumlah FROM laporan GROUP BY status")
+            ->fetchAll();
+        $hasil = array_fill_keys(["menunggu", "dipublikasi", "ditolak", "ditemukan"], 0);
+        foreach ($rows as $r) {
+            $hasil[$r["status"]] = (int) $r["jumlah"];
+        }
+        return $hasil;
+    }
+    public function allForAdmin($status = null): array
+    {
+        $sql =
+            "SELECT l.*,u.nama AS nama_pelapor,k.nama AS nama_kategori,lo.nama AS nama_lokasi FROM laporan l JOIN users u ON u.id=l.user_id JOIN kategori k ON k.id=l.kategori_id JOIN lokasi lo ON lo.id=l.lokasi_id";
+        if ($status) {
+            $s = $this->db->prepare($sql . " WHERE l.status=? ORDER BY l.created_at DESC");
+            $s->execute([$status]);
+            return $s->fetchAll();
+        }
+        return $this->db->query($sql . " ORDER BY l.created_at DESC")->fetchAll();
+    }
+    public function recentPending($limit = 5): array
+    {
+        $limit = max(1, min(20, (int) $limit));
+        return $this->db
+            ->query(
+                "SELECT l.*,u.nama AS nama_pelapor FROM laporan l JOIN users u ON u.id=l.user_id WHERE l.status='menunggu' ORDER BY l.created_at DESC LIMIT $limit",
+            )
+            ->fetchAll();
+    }
 }
-

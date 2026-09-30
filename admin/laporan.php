@@ -1,2 +1,23 @@
 <?php
-require __DIR__.'/../config.php';Auth::requireAdmin();$status=$_GET['status']??null;$daftar=(new Laporan())->allForAdmin(in_array($status,['menunggu','dipublikasi','ditolak','ditemukan'],true)?$status:null);$judul='Daftar Laporan';require __DIR__.'/../includes/header.php';?><h1 class="h2">Semua Laporan</h1><form class="mb-3"><select class="form-select w-auto d-inline" name="status"><option value="">Semua status</option><?php foreach(['menunggu','dipublikasi','ditolak','ditemukan'] as $s):?><option <?=$status===$s?'selected':''?> value="<?=$s?>"><?=e(ucfirst($s))?></option><?php endforeach?></select> <button class="btn btn-primary">Filter</button></form><div class="table-responsive"><table class="table bg-white"><thead><tr><th>Pelapor</th><th>Barang</th><th>Status</th><th></th></tr></thead><tbody><?php foreach($daftar as $l):?><tr><td><?=e($l['nama_pelapor'])?></td><td><?=e($l['nama_barang'])?></td><td><?=e(ucfirst($l['status']))?></td><td><a class="btn btn-sm btn-outline-primary" href="laporan-detail.php?id=<?=$l['id']?>">Detail</a></td></tr><?php endforeach?></tbody></table></div><?php require __DIR__.'/../includes/footer.php';
+require __DIR__ . "/../config.php";
+Auth::requireAdmin();
+$status = $_GET["status"] ?? null;
+$daftar = new Laporan()->allForAdmin(
+    in_array($status, ["menunggu", "dipublikasi", "ditolak", "ditemukan"], true) ? $status : null,
+);
+$judul = "Daftar Laporan";
+require __DIR__ . "/../includes/header.php";
+?><h1 class="h2">Semua Laporan</h1><form class="mb-3"><select class="form-select w-auto d-inline" name="status"><option value="">Semua status</option><?php foreach (
+    ["menunggu", "dipublikasi", "ditolak", "ditemukan"]
+    as $s
+): ?><option <?= $status === $s ? "selected" : "" ?> value="<?= $s ?>"><?= e(
+    ucfirst($s),
+) ?></option><?php endforeach; ?></select> <button class="btn btn-primary">Filter</button></form><div class="table-responsive"><table class="table bg-white"><thead><tr><th>Pelapor</th><th>Barang</th><th>Status</th><th></th></tr></thead><tbody><?php foreach (
+    $daftar
+    as $l
+): ?><tr><td><?= e($l["nama_pelapor"]) ?></td><td><?= e($l["nama_barang"]) ?></td><td><?= e(
+    ucfirst($l["status"]),
+) ?></td><td><a class="btn btn-sm btn-outline-primary" href="laporan-detail.php?id=<?= $l[
+    "id"
+] ?>">Detail</a></td></tr><?php endforeach; ?></tbody></table></div><?php require __DIR__ .
+    "/../includes/footer.php";
